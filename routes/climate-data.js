@@ -20,10 +20,12 @@ router.get("/upazila", authMiddleware, async (req, res) => {
     { date, season } = req.query;
 
   try {
+    const traps = await Traps
+      .find({ season, user: userId })
+      .populate("area");
+    if (traps.length === 0) throw new Error({ message: "No traps" });
+
     const
-      traps = await Traps
-        .find({ season, user: userId })
-        .populate("area"),
       gids = traps
         .map(trap => trap._doc.area.gid.split("_").slice(0, -1).join("_"))
         .filter((gid, i, arr) => arr.indexOf(gid) === i),
@@ -33,13 +35,14 @@ router.get("/upazila", authMiddleware, async (req, res) => {
         '/api/faw-forecasts/upazila',
         {
           baseURL: serverForecast,
-          params: { date, gids: gids.join(',') }
+          params: { date: 230201, gids: gids.join(',') }
         }
       );
+    if (gidForecasts.data.length === 0) throw new Error({ message: "No forecast data" });
 
     res.json(gidForecasts.data.map((el, i) => ({ ...el, area: gidUpzs[i]._doc })));
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).send('response' in err ? err.response.data : err.message);
   }
 });
 
