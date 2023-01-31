@@ -23,24 +23,28 @@ router.get("/upazila", authMiddleware, async (req, res) => {
     const traps = await Traps
       .find({ season, user: userId })
       .populate("area");
-    if (traps.length === 0) throw new Error({ message: "No traps" });
+    if (traps.length === 0) throw new Error("No traps");
 
     const
       gids = traps
         .map(trap => trap._doc.area.gid.split("_").slice(0, -1).join("_"))
         .filter((gid, i, arr) => arr.indexOf(gid) === i),
 
-      gidUpzs = await Areas.find({ season, gid: { $in: gids } }),
+      areaUpzs = await Areas.find({ season, gid: { $in: gids } }),
       gidForecasts = await get(
         '/api/faw-forecasts/upazila',
         {
           baseURL: serverForecast,
-          params: { date: 230201, gids: gids.join(',') }
+          params: { date, gids: gids.join(',') }
         }
       );
-    if (gidForecasts.data.length === 0) throw new Error({ message: "No forecast data" });
 
-    res.json(gidForecasts.data.map((el, i) => ({ ...el, area: gidUpzs[i]._doc })));
+    res.json(
+      areaUpzs.map(areaUpz => ({
+        ...areaUpz._doc,
+        forecast: gidForecasts.data.find(forecast => forecast.gid === areaUpz._doc.gid) || null
+      }))
+    );
   } catch (err) {
     res.status(500).send('response' in err ? err.response.data : err.message);
   }
