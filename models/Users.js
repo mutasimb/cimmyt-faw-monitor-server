@@ -3,6 +3,7 @@ const
 
   UserSchema = new Schema({
     name: { type: String, required: true },
+    role: { type: String, default: "Data", enum: ["Super Admin", "Moderator", "User Manager", "Data"] },
     title: { type: String },
     org: { type: String },
     email: { type: String },

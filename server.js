@@ -1,5 +1,6 @@
 const
   express = require("express"),
+  cors = require("cors"),
   { urlencoded, json } = require("body-parser"),
   { connect } = require("mongoose"),
 
@@ -7,18 +8,14 @@ const
 
   app = express();
 
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-auth-token");
-  next();
-});
+app.use(cors());
 app.use(urlencoded({ extended: false }));
 app.use(json());
 
 
 // routes
 app.use("/api/users", require("./routes/users.js"));
+app.use("/api/admins", require("./routes/admins.js"));
 app.use("/api/seasons", require("./routes/seasons.js"));
 app.use("/api/countries", require("./routes/countries.js"));
 app.use("/api/areas", require("./routes/areas.js"));
