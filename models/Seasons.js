@@ -11,7 +11,6 @@ const
       ],
       nTrap: { type: Number, required: true },
       season: { type: String, required: true },
-      year_span: { type: String, required: true },
       iY: { type: Number, required: true },
       im: { type: Number, required: true },
       id: { type: Number, required: true },

@@ -169,4 +169,26 @@ router.patch("/password", authMiddleware, async (req, res) => {
   }
 });
 
+// @route    GET /api/admins/users
+// @desc     Get list of users for a season
+// @access   Private
+router.get("/users", authMiddleware, async (req, res) => {
+  const
+    { userId, query } = req,
+    { season } = query,
+
+    roles = ["Super Admin", "Moderator", "User Manager"];
+
+  try {
+    const user = await Users.findById(userId).select("-password");
+    if(roles.indexOf(user.role) === -1) throw new Error('No access to admin data');
+
+    const targetUsers = await Users.find({ editSeasons: season, test: { $ne: true } }).select("-password");
+
+    res.json({ targetUsers });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 module.exports = router;
